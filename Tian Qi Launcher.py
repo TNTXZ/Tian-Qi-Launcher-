@@ -1,145 +1,95 @@
 # 导入库Import Library
+from queue import Queue
 import time
 import os
 import requests
 import random
+import threading
+import shutil
 
 path = os.getcwd() # 获得当前工作目录Get the current working directory
 
 # ------------------------------下载程序部分开始--------------------------------
 #                          Download program part starts
-# 1.8.8进度条模块1.8.8 Progress bar module
-def progressbar_1_8_8(url):
+
+class DownloadThread(threading.Thread):
+    def __init__(self, bytes_queue: Queue, url):
+        super().__init__(daemon=True)
+        self.bytes_queue = bytes_queue
+        self.url = url
+
+    def run(self):
+        while not self.bytes_queue.empty():
+            bytes_range = self.bytes_queue.get()
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36 Edg/92.0.902.84",
+                "Range": "bytes={}".format(bytes_range[1])
+            }
+            response = requests.get(self.url, headers=headers)
+            with open("temp/{}.tmp".format(bytes_range[0]), "wb") as f:
+                f.write(response.content)
+
+def get_file_size(url) -> int:
+    response = requests.head(url)
+    file_length = int(response.headers['Content-Length'])
+
+    return file_length
+
+def get_thread_download(file_length) -> list:
+    bytes = Queue(20)
+
+    start_bytes = -1
+    for i in range(20):
+        bytes_size = int(file_length/20)*i
+        
+        if i == 20-1: bytes_size = file_length
+        bytes_length = "{}-{}".format(start_bytes+1, bytes_size)
+        
+        bytes.put([i, bytes_length])
+        start_bytes = bytes_size
+
+    return bytes
+
+def create_threading(bytes_queue,url):
+    thread_list = []
+    for i in range(5):
+        thread = DownloadThread(bytes_queue, url)
+        thread.start()
+        thread_list.append(thread)
+
+    for thread in thread_list:
+        thread.join()
+
+def composite_file():
+    if os.path.isfile("spigot.jar"): os.remove("spigot.jar")
+    with open("spigot.jar", "ab") as f:
+        for i in range(20):
+            with open("temp/{}.tmp".format(i), "rb") as bytes_f:
+                f.write(bytes_f.read())
+
+def main(url):
+    file_length = get_file_size(url)
+    copies_queue = get_thread_download(file_length)
+    create_threading(copies_queue,url)
+    composite_file()
+    
+def download(url,version):
     try:
-        os.mkdir('1_8_8')
+        os.mkdir('temp')
+        os.mkdir(version)
     except:
-        print('已有目录，直接安装\n')
-    start = time.time() #下载开始时间Download start time
-    response = requests.get(url, stream=True)
-    size = 0    #初始化已下载大小Initialize downloaded size
-    chunk_size = 1024  # 每次下载的数据大小Data size per download
-    content_size = int(response.headers['content-length'])  # 下载文件总大小Total size of downloaded files
-    try:
-        if response.status_code == 200:   #判断是否响应成功Judge whether the response is successful
-            print('\n开始下载！[文件大小]:{size:.2f} MB'.format(size = content_size / chunk_size /1024))   #开始下载，显示下载文件大小
-            with open(path + "\\1_8_8\\spigot.jar",'wb') as file:   #显示进度条Show progress bar
-                for data in response.iter_content(chunk_size = chunk_size):
-                    file.write(data)
-                    size +=len(data)
-                    print('\r'+'[下载进度]:%s%.2f%%' % ('>'*int(size*50/ content_size), float(size / content_size * 100)) ,end=' ')
-        end = time.time()   #下载结束时间Download end time
-        print('下载完成!,用时: %.2f秒' % (end - start))  #输出下载用时时间Output download time
-    except:
-        print('错误!')
-    print('下载成功!')
+        time.sleep(1)
 
-def main_1_8_8():
-    # 下载1.8.8服务端核心文件Download 1.8.8 server core file
-    url = 'https://cdn.getbukkit.org/spigot/spigot-1.8.8-R0.1-SNAPSHOT-latest.jar'
-    progressbar_1_8_8(url)
+    if __name__ == '__main__':
+        main(url)
 
-################################################################################
-
-# 1.12.2进度条模块
-def progressbar_1_12_2(url):
-    try:
-        os.mkdir('1_12_2')
-    except:
-        print('已有目录，直接安装\n')
-    start = time.time() #下载开始时间
-    response = requests.get(url, stream=True)
-    size = 0    #初始化已下载大小
-    chunk_size = 1024  # 每次下载的数据大小
-    content_size = int(response.headers['content-length'])  # 下载文件总大小
-    os.mkdir
-    try:
-        if response.status_code == 200:   #判断是否响应成功
-            print('\n开始下载！[文件大小]:{size:.2f} MB'.format(size = content_size / chunk_size /1024))   #开始下载，显示下载文件大小
-            with open(path + "\\1_12_2\\spigot.jar",'wb') as file:   #显示进度条
-                for data in response.iter_content(chunk_size = chunk_size):
-                    file.write(data)
-                    size +=len(data)
-                    print('\r'+'[下载进度]:%s%.2f%%' % ('>'*int(size*50/ content_size), float(size / content_size * 100)) ,end=' ')
-        end = time.time()   #下载结束时间
-        print('下载完成!,用时: %.2f秒' % (end - start))  #输出下载用时时间
-    except:
-        print('错误!')
-    print('下载成功!')
-
-def main_1_12_2():
-    # 下载1.12.2服务端核心文件
-    url = 'https://cdn.getbukkit.org/spigot/spigot-1.12.2.jar'
-    progressbar_1_12_2(url)
-
-################################################################################
-
-# 1.16.5进度条模块
-def progressbar_1_16_5(url):
-    try:
-        os.mkdir('1_16_5')
-    except:
-        print('已有目录，直接安装\n')
-    start = time.time() #下载开始时间
-    response = requests.get(url, stream=True)
-    size = 0    #初始化已下载大小
-    chunk_size = 1024  # 每次下载的数据大小
-    content_size = int(response.headers['content-length'])  # 下载文件总大小
-    try:
-        if response.status_code == 200:   #判断是否响应成功
-            print('\n开始下载！[文件大小]:{size:.2f} MB'.format(size = content_size / chunk_size /1024))   #开始下载，显示下载文件大小
-            with open(path + "\\1_16_5\\spigot.jar",'wb') as file:   #显示进度条
-                for data in response.iter_content(chunk_size = chunk_size):
-                    file.write(data)
-                    size +=len(data)
-                    print('\r'+'[下载进度]:%s%.2f%%' % ('>'*int(size*50/ content_size), float(size / content_size * 100)) ,end=' ')
-        end = time.time()   #下载结束时间
-        print('下载完成!,用时: %.2f秒' % (end - start))  #输出下载用时时间
-    except:
-        print('错误!')
-    print('下载成功!')
-
-def main_1_16_5():
-    # 下载1.16.5服务端核心文件
-    url = 'https://cdn.getbukkit.org/spigot/spigot-1.16.5.jar'
-    progressbar_1_16_5(url)
-
-################################################################################
-
-# 1.19.3进度条模块
-def progressbar_1_19_3(url):
-    try:
-        os.mkdir('1_19_3')
-    except:
-        print('已有目录，直接安装\n')
-    start = time.time() #下载开始时间
-    response = requests.get(url, stream=True)
-    size = 0    #初始化已下载大小
-    chunk_size = 1024  # 每次下载的数据大小
-    content_size = int(response.headers['content-length'])  # 下载文件总大小
-    try:
-        if response.status_code == 200:   #判断是否响应成功
-            print('\n开始下载！[文件大小]:{size:.2f} MB'.format(size = content_size / chunk_size /1024))   #开始下载，显示下载文件大小
-            with open(path + "\\1_19_3\\spigot.jar",'wb') as file:   #显示进度条
-                for data in response.iter_content(chunk_size = chunk_size):
-                    file.write(data)
-                    size +=len(data)
-                    print('\r'+'[下载进度]:%s%.2f%%' % ('>'*int(size*50/ content_size), float(size / content_size * 100)) ,end=' ')
-        end = time.time()   #下载结束时间
-        print('下载完成!,用时: %.2f秒' % (end - start))  #输出下载用时时间
-    except:
-        print('错误!')
-    print('下载成功!')
-
-def main_1_19_3():
-    # 下载1.19.3服务端核心文件
-    url = 'https://download.getbukkit.org/spigot/spigot-1.19.3.jar'
-    progressbar_1_19_3(url)
-
+    shutil.rmtree('temp')
+    shutil.move('spigot.jar',version + '/spigot.jar')
 
 # ------------------------------下载程序部分结束--------------------------------
 #                           End of download program
 # 启动器主程序
-print('天启启动器1.0，一款暂时无UI的MC启动器(windows系统)，一款可以开服务器的启动器!')
+print('天启启动器2.5，一款暂时无UI的MC启动器(windows系统)，一款可以开服务器的启动器!')
 print("")
 time.sleep(random.randint(2,3))
 print('启动中')
@@ -164,7 +114,7 @@ while True:
         if option == '1.8.8':
             print('这就为您安装1.8.8服务器')
             time.sleep(1)
-            main_1_8_8() # 安装1.8.8服务器
+            download('https://cdn.getbukkit.org/spigot/spigot-1.8.8-R0.1-SNAPSHOT-latest.jar','1_8_8') # 安装1.8.8服务器
             print('下载完成！请自行用生成的脚本启动！')
             time.sleep(1)
             with open(path + "\\1_8_8\\开服务器.bat",'w') as file:
@@ -179,7 +129,7 @@ while True:
         if option == '1.12.2':
             print('这就为您安装1.12.2服务器')
             time.sleep(1)
-            main_1_12_2() # 安装1.12.2服务器
+            download('https://cdn.getbukkit.org/spigot/spigot-1.12.2.jar','1_12_2') # 安装1.12.2服务器
             print('下载完成！请自行用生成的脚本启动！')
             time.sleep(1)
             with open(path + "\\1_12_2\\开服务器.bat",'w') as file:
@@ -194,7 +144,7 @@ while True:
         if option == '1.16.5':
             print('这就为您安装1.16.5服务器')
             time.sleep(1)
-            main_1_16_5() # 安装1.16.5服务器
+            download('https://cdn.getbukkit.org/spigot/spigot-1.16.5.jar','1_16_5') # 安装1.16.5服务器
             print('下载完成！请自行用生成的脚本启动！')
             time.sleep(1)
             with open(path + "\\1_16_5\\开服务器.bat",'w') as file:
@@ -209,7 +159,7 @@ while True:
         if option == '1.19.3':
             print('这就为您安装1.19.3服务器')
             time.sleep(1)
-            main_1_19_3() # 安装1.19.3服务器
+            download('https://download.getbukkit.org/spigot/spigot-1.19.3.jar','1_19_3') # 安装1.19.3服务器
             print('下载完成！请自行用生成的脚本启动！')
             time.sleep(1)
             with open(path + "\\1_19_3\\开服务器.bat",'w') as file:
