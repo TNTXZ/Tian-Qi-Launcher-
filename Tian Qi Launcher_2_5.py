@@ -92,11 +92,11 @@ def download(url,version):
 print('天启启动器2.5，一款暂时无UI的MC启动器(windows系统)，一款可以开服务器的启动器!')
 print("")
 time.sleep(random.randint(2,3))
-print('启动中')
+print('启动中...')
 time.sleep(random.randint(1,2))
-print('启动完毕\n')
+print('启动完毕！\n')
 time.sleep(random.randint(1,2))
-print('[ 公 告 ] 作者:TNTXZ,QQ:35266332')
+print('[ 公 告 ] 作者: TNTXZ ,QQ: 35266332 , 联合作者： Lion_Deer , QQ: 2964774820 ')
 print("")
 print('[ 重 要 公 告 ] 以后不需要打开此启动器重新下载和打开，否则会出错(作者懒得编检测代码)\n启动器会自动生成开服脚本在文件夹里(如1.8.8服务器在1_8_8文件夹里，里面有"开服务器.bat"双击启动)')
 time.sleep(5)
@@ -110,7 +110,7 @@ print("")
 javapath = input('请输入您的java路径不用包含java.exe,要到bin文件夹为止( 比如 C:\Program Files (x86)\Java\jdk1.8\ bin )\n')
 
 while True:
-        option = input('\n请选择下载启动版本,目前支持1.8.8,1.12.2,1.16.5,1.19.3版本(1.8.8/1.12.2/1.16.5/1.19.3)\n')
+        option = input('\n请选择下载启动版本,目前支持 1.8.8 , 1.12.2 , 1.16.5 , 1.19.3 版本(1.8.8/1.12.2/1.16.5/1.19.3)\n')
         if option == '1.8.8':
             print('这就为您安装1.8.8服务器')
             time.sleep(1)
@@ -126,7 +126,7 @@ while True:
             time.sleep(3)
             break
 
-        if option == '1.12.2':
+        elif option == '1.12.2':
             print('这就为您安装1.12.2服务器')
             time.sleep(1)
             download('https://cdn.getbukkit.org/spigot/spigot-1.12.2.jar','1_12_2') # 安装1.12.2服务器
@@ -141,7 +141,7 @@ while True:
             time.sleep(3)
             break
 
-        if option == '1.16.5':
+        elif option == '1.16.5':
             print('这就为您安装1.16.5服务器')
             time.sleep(1)
             download('https://cdn.getbukkit.org/spigot/spigot-1.16.5.jar','1_16_5') # 安装1.16.5服务器
@@ -156,7 +156,7 @@ while True:
             time.sleep(3)
             break
 
-        if option == '1.19.3':
+        elif option == '1.19.3':
             print('这就为您安装1.19.3服务器')
             time.sleep(1)
             download('https://download.getbukkit.org/spigot/spigot-1.19.3.jar','1_19_3') # 安装1.19.3服务器
@@ -170,3 +170,6 @@ while True:
             print('生成脚本成功！祝您愉快！拜拜')
             time.sleep(3)
             break
+        else:     #如果输入不正确：
+            print("无法识别的输入，请重新输入！\n")
+            time.sleep(2)
