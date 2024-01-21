@@ -1,3 +1,4 @@
+
 # 导入库Import Library
 from queue import Queue
 import time
@@ -6,6 +7,9 @@ import requests
 import random
 import threading
 import shutil
+import os
+import platform
+
 
 path = os.getcwd() # 获得当前工作目录Get the current working directory
 
@@ -88,27 +92,84 @@ def download(url,version):
 
 # ------------------------------下载程序部分结束--------------------------------
 #                           End of download program
+#__________
+#封装清屏代码(Windows)X
+#def clear():
+    # clear()
+#    os.system("clear")
+#封装清屏代码
+def  clear():
+    # 返回系统平台/OS的名称，如Linux，Windows，Java，Darwin
+    system = platform.system()
+    if (system == u'Windows'):
+        os.system('cls')
+    else:
+        os.system('clear')
+#__________
+# 打印彩色字符
+def colorprint(msg: str, color: str = "", timestamp: bool = True):
+    str = ""
+    if timestamp:
+        str += time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())) + "  "
+    if color == "red":
+        str += "\033[1;31;40m"
+    elif color == "green":
+        str += "\033[1;32;40m"
+    elif color == "yellow":
+        str += "\033[1;33;40m"
+    elif color == "black":
+        str += "\033[1;30;40m"
+    elif color == "blue":
+        str += "\033[1;34;40m"
+    elif color == "purple":
+        str += "\033[1;35;40m"
+    elif color == "beige":
+        str += "\033[1;36;40"
+    elif color == "white":
+        str += "\033[1;37;40" 
+    else:
+        print(str + msg)
+        return
+    str += msg + "\033[0m"
+    print(str)
+#__________
+def threedotwhile():
+    clear()
+    print("\033[0;37;40m启动中.\033[0m")
+    time.sleep(0.25)
+    clear()
+    print("\033[0;37;40m启动中..\033[0m")
+    time.sleep(0.25)
+    clear()
+    print("\033[0;37;40m启动中...\033[0m")
+    time.sleep(0.25)
+
+#------------------------------------------------------------------------------
 # 启动器主程序
-print('天启启动器2.5，一款暂时无UI的MC启动器(windows系统)，一款可以开服务器的启动器!')
+clear()#清除程序开始部分的内容
+colorprint('天启启动器2.5，一款暂无UI的Minecraft启动器(Windows系统)，一款可以开服务器的启动器!',"blue")
 print("")
-time.sleep(random.randint(2,3))
-print('启动中...')
+time.sleep(random.randint(3,5))
+# print('启动中...')
+for i in range(random.randint(2,5)):
+    threedotwhile()
+colorprint('\n启动完毕！\n',"green")
 time.sleep(random.randint(1,2))
-print('启动完毕！\n')
-time.sleep(random.randint(1,2))
-print('[ 公 告 ] 作者: TNTXZ ,QQ: 35266332 , 联合作者： Lion_Deer , QQ: 2964774820 ')
+clear()
+print('\033[0;33;40m[关于作者]\033[0m \033[0;36;40m作者\033[0m : \033[0;34;40mTNTXZ\033[0m ,\033[0;33;40mQQ: 35266332\033[0m , \033[0;36;40m联合作者\033[0m ： \033[0;32;40mLion_Deer\033[0m , \033[0;33;40mQQ: 2964774820\033[0m !')
 print("")
-print('[ 重 要 公 告 ] 以后不需要打开此启动器重新下载和打开，否则会出错(作者懒得编检测代码)\n启动器会自动生成开服脚本在文件夹里(如1.8.8服务器在1_8_8文件夹里，里面有"开服务器.bat"双击启动)')
+print('\033[1;31;40m [ 重 要 提 醒 ] \033[0m \033[0;31;40m以后不需要打开此启动器重新下载和打开，否则会出错(作者们懒得编检测代码)\n启动器会自动生成开服脚本在文件夹里(如1.8.8服务器在1_8_8文件夹里，里面有"开服务器.bat"，双击启动)\033[0m')
 time.sleep(5)
 print("")
-print('[ 提 示 ] 1.8.8、1.12.2建议用JDK8，1.16.5建议JDK11，1.19.3建议JDK17！')
+print('\033[4;37;40m[小建议] 1.8.8、1.12.2建议用JDK8，1.16.5建议JDK11，1.19.3建议JDK17 ~\033[0m')
 print("")
 xms = input('请选择服务器最小内存(单位：mb)只需要输入一个数字即可！\n')
 print("")
 xmx = input('请选择服务器最大内存(单位：mb)只需要输入一个数字即可！\n')
 print("")
-javapath = input('请输入您的java路径不用包含java.exe,要到bin文件夹为止( 比如 C:\Program Files (x86)\Java\jdk1.8\ bin )\n')
+javapath = input('请输入您的java路径不用包含java.exe,要到bin文件夹为止( 如 C:\Program Files (x86)\Java\jdk1.8\ bin )\n')
 
+wrongnum = 0
 while True:
         option = input('\n请选择下载启动版本,目前支持 1.8.8 , 1.12.2 , 1.16.5 , 1.19.3 版本(1.8.8/1.12.2/1.16.5/1.19.3)\n')
         if option == '1.8.8':
@@ -171,5 +232,14 @@ while True:
             time.sleep(3)
             break
         else:     #如果输入不正确：
-            print("无法识别的输入，请重新输入！\n")
-            time.sleep(2)
+            wrongnum = wrongnum + 1
+            if wrongnum < 10:
+                print("无法识别的版本，请重新输入！\n(Tips:格式为 1.xx.x ,如： 1.19.3 )")
+                time.sleep(0.25)
+            elif wrongnum == 10:
+                print("\033[3;36;40m已经输错十次啦！还有最后\033[1;31;40m1次输入机会！\033[0m\033[0m")
+                time.sleep(2)
+            elif wrongnum > 10:
+                print("错误次数太多，自动退出程序！")
+                time.sleep(2)
+                break
